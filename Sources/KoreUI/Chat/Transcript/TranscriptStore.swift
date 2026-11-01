@@ -1323,13 +1323,24 @@ package final class TranscriptStore {
 
     // MARK: Sub-agents
 
+    /// A new agent's mark index: the next in spawn order, moved on to the first whose shape no running
+    /// agent of this chat has, so two live agents never share a shape (with more than eight live,
+    /// shapes repeat). Finished agents' shapes are free again; an agent keeps its index for life.
+    func freeAgentIndex() -> Int {
+        let base = agentCards.count + laneAgents.count
+        let count = AgentShape.allCases.count
+        let live = Set(agentOrder.compactMap { agent($0) }.filter { $0.status == .running }.map { $0.index % count })
+        let step = (0..<count).first { !live.contains((base + $0) % count) } ?? 0
+        return base + step
+    }
+
     func agentSpawned(
         id: String, name: String, type: String?, model: String? = nil, prompt: String? = nil, background: Bool = false,
         tool: String?, parent: String? = nil, at date: Date = Date()
     ) {
         var entry = Entry(kind: .agent, text: name, toolId: tool)
         entry.agent = AgentInfo(
-            id: id, index: agentCards.count + laneAgents.count, name: name, type: type, model: model, prompt: prompt,
+            id: id, index: freeAgentIndex(), name: name, type: type, model: model, prompt: prompt,
             parent: parent, background: background, startedAt: date)
         agentOrder.append(id)
         lanes[id] = lanes[id] ?? []
