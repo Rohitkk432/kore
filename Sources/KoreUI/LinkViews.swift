@@ -110,6 +110,7 @@ struct LinkCardView: View {
         .task {
             try? await Task.sleep(for: Size.Link.allowDelay)
             ready.value = true
+            LinkPanel.allowsReady = true
         }
     }
 }
@@ -145,7 +146,11 @@ package enum LinkPanel {
     package static func closeCard() {
         card?.orderOut(nil)
         card = nil
+        allowsReady = false
     }
+
+    /// The open card's Allows take a press: its moment has passed since the card was drawn.
+    package fileprivate(set) static var allowsReady = false
 
     /// The card is up.
     package static var cardOpen: Bool { card != nil }

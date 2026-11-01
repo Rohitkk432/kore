@@ -23,7 +23,7 @@ final class LinkRingAndAct: ChatStoryline {
             Do("start with no link") { _ in LinkStoryClient.reset() },
             Do("ring the doorbell") { _ in try client.ring() },
             WaitForElement(.id(StoryID.Link.card)),
-            Expect("a moment before Allow takes a press") { _ in Date() > client.rungAt.addingTimeInterval(0.9) },
+            Expect("the card's Allows take a press") { _ in LinkPanel.allowsReady },
             Press(.id(StoryID.Link.allow)),
             Expect("the link awake, with its socket, and no mark before a client") { _ in
                 client.socket != nil && LinkHost.current != nil && client.runSecret != nil
@@ -130,7 +130,7 @@ final class LinkOpensUnstartedChat: ChatStoryline {
             Do("start with no link") { _ in LinkStoryClient.reset() },
             Do("ring, then Allow") { _ in try client.ring() },
             WaitForElement(.id(StoryID.Link.card)),
-            Expect("a moment before Allow takes a press") { _ in Date() > client.rungAt.addingTimeInterval(0.9) },
+            Expect("the card's Allows take a press") { _ in LinkPanel.allowsReady },
             Press(.id(StoryID.Link.allow)),
             Do("connect") { _ in client.connect() },
             Expect("welcomed, with a window") { _ in client.welcomed && !client.snapshotWindows.isEmpty },
@@ -182,7 +182,7 @@ final class LinkFullControl: ChatStoryline {
             Do("start with no link") { _ in LinkStoryClient.reset() },
             Do("ring") { _ in try full.ring() },
             WaitForElement(.id(StoryID.Link.card)),
-            Expect("a moment before Allow takes a press") { _ in Date() > full.rungAt.addingTimeInterval(0.9) },
+            Expect("the card's Allows take a press") { _ in LinkPanel.allowsReady },
             Press(.id(StoryID.Link.allowFull)),
             Do("connect") { _ in full.connect() },
             Expect("welcomed, with a window") { _ in full.welcomed && !full.snapshotWindows.isEmpty },
@@ -209,7 +209,7 @@ final class LinkFullControl: ChatStoryline {
                 try plain.ring(key: "plain-sender")
             },
             WaitForElement(.id(StoryID.Link.card)),
-            Expect("a moment before Allow takes a press") { _ in Date() > plain.rungAt.addingTimeInterval(0.9) },
+            Expect("the card's Allows take a press") { _ in LinkPanel.allowsReady },
             Press(.id(StoryID.Link.allow)),
             Do("connect") { _ in plain.connect() },
             Expect("welcomed") { _ in plain.welcomed },
@@ -246,7 +246,7 @@ final class LinkFilesAndCommands: ChatStoryline {
             Do("start with no link") { _ in LinkStoryClient.reset() },
             Do("ring, then Allow") { _ in try client.ring() },
             WaitForElement(.id(StoryID.Link.card)),
-            Expect("a moment before Allow takes a press") { _ in Date() > client.rungAt.addingTimeInterval(0.9) },
+            Expect("the card's Allows take a press") { _ in LinkPanel.allowsReady },
             Press(.id(StoryID.Link.allow)),
             Do("connect") { story in
                 chatId = try story.activeChat().id.uuidString
@@ -512,7 +512,7 @@ class LinkedNavCost: Storyline {
             link = [
                 Do("ring the doorbell") { _ in try client.ring(key: "nav") },
                 WaitForElement(.id(StoryID.Link.card)),
-                Expect("a moment before Allow takes a press") { _ in Date() > client.rungAt.addingTimeInterval(0.9) },
+                Expect("the card's Allows take a press") { _ in LinkPanel.allowsReady },
                 Press(.id(StoryID.Link.allow)),
                 Expect("the link awake") { _ in client.socket != nil },
                 Do("connect") { _ in client.connect() },
