@@ -162,6 +162,9 @@ final class OptionsMenu {
         anchor = point
         self.source = source
         let host = NSHostingView(rootView: OptionsList(menu: self))
+        // Above the content it's under the title bar's safe area, which would push the list down
+        // inside its frame and cut its last rows off.
+        host.safeAreaRegions = []
         host.setAccessibilityRole(.menu)
         self.host = host
         guard let content = window.contentView else { return }
@@ -212,9 +215,7 @@ final class OptionsMenu {
 
     private func place() {
         guard let content = owner?.contentView, let host else { return }
-        // Rows grow with zoomed text (⌘=): counted at the zoomed height, nothing cut off.
-        let row = max(Layout.Options.row, Layout.Options.row * Zoom.shared.scale)
-        let height = min(Size.menuMax, CGFloat(items.filter { !$0.separator }.count + (parents.isEmpty ? 0 : 1)) * row
+        let height = min(Size.menuMax, CGFloat(items.filter { !$0.separator }.count + (parents.isEmpty ? 0 : 1)) * Layout.Options.row
                          + CGFloat(items.filter(\.separator).count) * (Stroke.hairline + Space.xs * 2) + Space.xs * 2)
         let point = content.convert(anchor, from: nil)
         host.frame = Self.fitting(point: point, size: CGSize(width: Layout.Options.width, height: height),
