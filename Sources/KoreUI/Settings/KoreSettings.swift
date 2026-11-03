@@ -1,10 +1,17 @@
 import AppKit
 import Foundation
 
-/// Settings with no home of their own yet: what a new chat starts with, and the alerts while
-/// Kore is in the background. All in UserDefaults; nothing set keeps Kore's behaviour.
+/// Settings with no home of their own yet: what a new chat starts with, the code font, and the
+/// alerts while Kore is in the background. All in UserDefaults; nothing set keeps Kore's behaviour.
 enum KoreSettings {
     static let autoCompactKey = "kore.defaultAutoCompact"
+    /// The buttons under a message (each on unless turned off), and copying a finished selection.
+    static let copyButtonKey = "kore.actions.copy"
+    static let forkButtonKey = "kore.actions.fork"
+    static let selectionCopyKey = "kore.selection.copy"
+    /// The prompt box across the chat's whole width, not capped at 760.
+    static let fullWidthComposerKey = "kore.composer.fullWidth"
+    static let codeFontKey = "kore.codeFont"
     static func modelKey(_ provider: String) -> String { "kore.defaultModel.\(provider)" }
     static func effortKey(_ provider: String) -> String { "kore.defaultEffort.\(provider)" }
     static func modeKey(_ provider: String) -> String { "kore.defaultMode.\(provider)" }
@@ -52,6 +59,46 @@ enum KoreSettings {
         appearance.preview(Appearance.kore)
         appearance.save()
         appearance.refresh()
+    }
+
+    // MARK: Code font
+
+    /// The family code is drawn in (transcript code, editor, selection); Menlo when unset or gone.
+    /// The regular face's PostScript name ("MesloLGSNFM-Regular"): SwiftUI's `Font.custom` and Core
+    /// Text match a PostScript or full name, not a family ("MesloLGS Nerd Font Mono"), and fall back
+    /// to the system font without a word when given one.
+    static var codeFont: String {
+        guard let family = UserDefaults.standard.string(forKey: codeFontKey) else { return "Menlo" }
+        return NSFontManager.shared.font(withFamily: family, traits: [], weight: 5, size: 12)?.fontName
+            ?? NSFont(name: family, size: 12)?.fontName ?? "Menlo"
+    }
+
+    static func codeFont(size: CGFloat, bold: Bool = false) -> NSFont {
+        guard let font = NSFont(name: codeFont, size: size) else {
+            return .monospacedSystemFont(ofSize: size, weight: bold ? .bold : .regular)
+        }
+        return bold ? NSFontManager.shared.convert(font, toHaveTrait: .boldFontMask) : font
+    }
+
+    /// Starts a new Kore and quits this one; open tabs come back, as after any quit.
+    @MainActor static func relaunch() {
+        let bundle = Bundle.main.bundleURL
+        let process = Process()
+        if bundle.pathExtension == "app" {
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+            process.arguments = ["-n", bundle.path]
+        } else {
+            // `swift run` / .build/debug/Kore: the same binary again, after this one has gone.
+            process.executableURL = URL(fileURLWithPath: "/bin/sh")
+            process.arguments = ["-c", "sleep 1; exec \"$0\"", CommandLine.arguments[0]]
+        }
+        guard (try? process.run()) != nil else { return }
+        NSApp.terminate(nil)
+    }
+
+    /// Installed fixed-pitch families, for the picker.
+    @MainActor static func monospacedFamilies() -> [String] {
+        NSFontManager.shared.availableFontFamilies.filter { NSFont(name: $0, size: 12)?.isFixedPitch == true }
     }
 
     // MARK: Background alerts

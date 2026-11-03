@@ -845,15 +845,22 @@ struct MessageActionsRow: View {
     let story: StoryID
     let fork: () -> Void
     @StateObject private var copied = Local(false)
+    /// Settings ▸ Text ▸ Message buttons.
+    @AppStorage(KoreSettings.copyButtonKey) private var showCopy = true
+    @AppStorage(KoreSettings.forkButtonKey) private var showFork = true
 
     var body: some View {
         HStack(spacing: Size.MessageActions.gap) {
             if shown {
-                IconButton(symbol: copied.value ? "checkmark" : "doc.on.doc", kind: .mini, font: Chrome.label, help: "Copy", action: copy)
-                    .storyID(story.part(.copy))
-                IconButton(symbol: "arrow.triangle.branch", kind: .mini, font: Chrome.label, help: "Fork", action: fork)
-                    .disabled(!canFork)
-                    .storyID(story.part(.fork))
+                if showCopy {
+                    IconButton(symbol: copied.value ? "checkmark" : "doc.on.doc", kind: .mini, font: Chrome.label, help: "Copy", action: copy)
+                        .storyID(story.part(.copy))
+                }
+                if showFork {
+                    IconButton(symbol: "arrow.triangle.branch", kind: .mini, font: Chrome.label, help: "Fork", action: fork)
+                        .disabled(!canFork)
+                        .storyID(story.part(.fork))
+                }
             }
         }
         .frame(height: Size.MessageActions.row, alignment: .leading)

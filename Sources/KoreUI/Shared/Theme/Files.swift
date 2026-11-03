@@ -132,11 +132,11 @@ extension Chrome {
 extension TextStyle {
     /// Editor text: Menlo 12, zoomed (an AppKit font for the text view).
     @MainActor static var editorFont: NSFont {
-        NSFont(name: "Menlo", size: 12 * Zoom.shared.scale) ?? .monospacedSystemFont(ofSize: 12 * Zoom.shared.scale, weight: .regular)
+        KoreSettings.codeFont(size: 12 * Zoom.shared.scale)
     }
 
     @MainActor static var editorFontBold: NSFont {
-        NSFont(name: "Menlo-Bold", size: 12 * Zoom.shared.scale) ?? .monospacedSystemFont(ofSize: 12 * Zoom.shared.scale, weight: .bold)
+        KoreSettings.codeFont(size: 12 * Zoom.shared.scale, bold: true)
     }
 }
 

@@ -23,7 +23,7 @@ struct SettingsView: View {
             switch self {
             case .appearance: "Kore's colours, from any Ghostty theme. The terminal follows."
             case .newChats: "What a new chat starts with. A reopened chat keeps its own."
-            case .text: "Chat style and text size."
+            case .text: "Chat style, message buttons, text size and the code font."
             case .notifications: "Sounds and the Dock while Kore is in the background."
             case .shortcuts: "Every menu shortcut, and how to change one."
             }
@@ -335,11 +335,20 @@ private struct ProviderDefaults: View {
 // MARK: - Text
 
 private struct TextSettings: View {
+    @AppStorage(KoreSettings.codeFontKey) private var codeFont = "Menlo"
     @AppStorage(ChatStyle.key) private var chatStyle = ChatStyle.classic
+    @AppStorage(KoreSettings.copyButtonKey) private var showCopy = true
+    @AppStorage(KoreSettings.forkButtonKey) private var showFork = true
+    @AppStorage(KoreSettings.selectionCopyKey) private var selectionCopy = false
+    @AppStorage(KoreSettings.fullWidthComposerKey) private var fullComposer = false
+    @State private var families: [String] = []
 
     var body: some View {
         let zoom = Zoom.shared
         Card(title: "Chat") {
+            Row(title: "Full-width prompt box", note: "The prompt box spans the chat's width instead of stopping at 760 pt.") {
+                Toggle("", isOn: $fullComposer).toggleStyle(.switch).labelsHidden()
+            }
             Row(title: "Chat style", note: "Document: tables and code in cards, quotes on a bar, more air between blocks, no timeline rail. Classic is Kore's original.", last: true) {
                 Picker("", selection: $chatStyle) {
                     ForEach(ChatStyle.allCases, id: \.self) { Text($0.title).tag($0) }
@@ -349,13 +358,35 @@ private struct TextSettings: View {
                 .onChange(of: chatStyle) { Appearance.shared.refresh() }
             }
         }
+        Card(title: "Message buttons") {
+            Row(title: "Copy", note: "Under each message and answer, on hover.") {
+                Toggle("", isOn: $showCopy).toggleStyle(.switch).labelsHidden()
+            }
+            Row(title: "Fork", note: "A new tab that goes on from that point.") {
+                Toggle("", isOn: $showFork).toggleStyle(.switch).labelsHidden()
+            }
+            Row(title: "Copy on selection", note: "Selected text goes to the clipboard as you finish selecting, as in a terminal.", last: true) {
+                Toggle("", isOn: $selectionCopy).toggleStyle(.switch).labelsHidden()
+            }
+        }
         Card(title: "Fonts") {
-            Row(title: "Text size", note: "\(Int((zoom.scale * 100).rounded()))%. Same as ⌘= and ⌘-.", last: true) {
+            Row(title: "Text size", note: "\(Int((zoom.scale * 100).rounded()))%. Same as ⌘= and ⌘-.") {
                 Slider(
                     value: Binding(get: { Double(zoom.scale) }, set: { zoom.commitPinch(CGFloat(($0 * 10).rounded() / 10)) }),
                     in: Double(Zoom.range.lowerBound)...Double(Zoom.range.upperBound), step: 0.1)
             }
+            Row(title: "Code font", note: "Code, the editor and the terminal. The terminal and new text change at once.") {
+                Picker("", selection: $codeFont) {
+                    ForEach(families, id: \.self) { Text($0).tag($0) }
+                }
+                .labelsHidden()
+                .onChange(of: codeFont) { Appearance.shared.refresh() }
+            }
+            Row(title: "Redraw everything", note: "Chats and files already open keep their old font until Kore restarts. Tabs come back.", last: true) {
+                Button("Relaunch Kore") { KoreSettings.relaunch() }
+            }
         }
+        .onAppear { families = KoreSettings.monospacedFamilies() }
     }
 }
 
@@ -502,7 +533,7 @@ private struct RestoreDefaultsButton: View {
             Button("Restore Defaults", role: .destructive) { KoreSettings.restoreDefaults() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Theme, new-chat defaults, chat style, text size and notifications go back to Kore's own. This can't be undone.")
+            Text("Theme, new-chat defaults, text, notifications and message buttons go back to Kore's own. This can't be undone.")
         }
     }
 }

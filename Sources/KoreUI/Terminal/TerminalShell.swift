@@ -139,6 +139,9 @@ final class TerminalShell: NSObject, LocalProcessTerminalViewDelegate {
         view.nativeBackgroundColor = palette.background
         view.nativeForegroundColor = palette.text
         view.caretColor = palette.accent
+        // Settings ▸ Text ▸ Code font (a Nerd Font's glyphs show here); only when it changed: a new font relays the grid.
+        let font = KoreSettings.codeFont(size: 12)
+        if view.font.fontName != font.fontName { view.font = font }
         view.installColors(palette.ansi.count == 16 ? palette.ansi.map(Self.term) : SwiftTerm.Color.terminalAppColors)
         view.selectedTextBackgroundColor = NSColor(Theme.Selection.active)
         view.suspendsRenderingWhenNotVisible = true

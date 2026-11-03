@@ -58,7 +58,7 @@ enum SelectionStyle: Equatable {
     private static let headings: [CGFloat] = [26, 20, 15, 13, 11, 11]
 
     private static func mono(_ size: CGFloat) -> NSFont {
-        NSFont(name: "Menlo", size: size) ?? .monospacedSystemFont(ofSize: size, weight: .regular)
+        KoreSettings.codeFont(size: size)
     }
 }
 
