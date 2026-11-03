@@ -39,7 +39,10 @@ package struct KoreApp: App {
         .windowResizability(.contentSize)
         .defaultPosition(.center)
         .commands {
-            CommandGroup(after: .appInfo) { StayAwakeCommands() }
+            CommandGroup(after: .appInfo) {
+                SettingsCommand()
+                StayAwakeCommands()
+            }
             // Kore keeps its settings in the / menu, with no Settings window: ⌘, opens Account there.
             CommandGroup(replacing: .appSettings) { AccountCommands() }
             CommandGroup(replacing: .newItem) { FileCommands(app: app) }
@@ -59,6 +62,12 @@ package struct KoreApp: App {
                 Button("Actual Size") { Zoom.shared.reset() }.keyboardShortcut("0")
             }
         }
+
+        Window("Settings", id: SettingsView.id) {
+            SettingsView().containerBackground(Theme.background, for: .window)
+        }
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
 
         // One window per folder. Opening a folder that already has a window focuses it.
         WindowGroup(for: URL.self) { $folder in
