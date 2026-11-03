@@ -23,7 +23,7 @@ struct SettingsView: View {
             switch self {
             case .appearance: "Kore's colours, from any Ghostty theme. The terminal follows."
             case .newChats: "What a new chat starts with. A reopened chat keeps its own."
-            case .text: "Text size."
+            case .text: "Chat style and text size."
             case .notifications: "Sounds and the Dock while Kore is in the background."
             case .shortcuts: "Every menu shortcut, and how to change one."
             }
@@ -335,8 +335,20 @@ private struct ProviderDefaults: View {
 // MARK: - Text
 
 private struct TextSettings: View {
+    @AppStorage(ChatStyle.key) private var chatStyle = ChatStyle.classic
+
     var body: some View {
         let zoom = Zoom.shared
+        Card(title: "Chat") {
+            Row(title: "Chat style", note: "Document: tables and code in cards, quotes on a bar, more air between blocks, no timeline rail. Classic is Kore's original.", last: true) {
+                Picker("", selection: $chatStyle) {
+                    ForEach(ChatStyle.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .onChange(of: chatStyle) { Appearance.shared.refresh() }
+            }
+        }
         Card(title: "Fonts") {
             Row(title: "Text size", note: "\(Int((zoom.scale * 100).rounded()))%. Same as ⌘= and ⌘-.", last: true) {
                 Slider(
@@ -490,7 +502,7 @@ private struct RestoreDefaultsButton: View {
             Button("Restore Defaults", role: .destructive) { KoreSettings.restoreDefaults() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Theme, new-chat defaults, text size and notifications go back to Kore's own. This can't be undone.")
+            Text("Theme, new-chat defaults, chat style, text size and notifications go back to Kore's own. This can't be undone.")
         }
     }
 }

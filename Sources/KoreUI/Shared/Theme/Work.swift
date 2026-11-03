@@ -140,7 +140,7 @@ extension Motion {
 
 extension PanelStyle {
     /// The user's message.
-    static let userBox = PanelStyle(fill: Theme.surface, radius: Radius.chip, line: Theme.border)
+    static let userBox = PanelStyle(fill: Theme.userFill, radius: Radius.chip, line: Theme.userLine)
     /// A tool's IN / OUT box, and the DiffView in the timeline.
     static let toolBody = PanelStyle(fill: Theme.surface, radius: Radius.chip, line: Theme.border, width: Stroke.fine)
 }
